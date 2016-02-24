@@ -1,0 +1,1 @@
+../../work/steffen.config/.vim/syntax/gitrebase.vim
