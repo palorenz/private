@@ -282,7 +282,7 @@ set   textwidth=80
   ab Yoki   oki<CR><CR>Patrick<CR>
   ab HDL    HDL<CR><CR>Patrick
   ab MfG    Mit freundlichen Grüßen / Best regards<CR><CR>Patrick Lorenz
-  ab Yme    Patrick Lorenz <patrick.lorenz@de.transport.bombardier.com>
+  ab Yme    Patrick Lorenz <patrick.lorenz@rail.bombardier.com>
   ab Ynos   # PAL - no SCR intern:
 
   ab Yline1 ------------------------------------------------------------------->8=======
@@ -607,6 +607,7 @@ au BufEnter *.[ch]      set ai et sw=4 ts=4 "cino=l1,g0
 au BufEnter *.cc        set ai et sw=4 ts=4 "cino=l1,g0
 au BufEnter *.cpp       set ai et sw=4 ts=4 "cino=l1,g0
 au BufEnter *.java      set ai et sw=4 ts=4
+au BufEnter *.lua       set ai et sw=4 ts=4
 au BufEnter *.idl       set ai et sw=4 ts=4
 au BufEnter *.p[ml]     set ai et sw=4 ts=4
 au BufEnter .vimrc      set ai et sw=4 ts=4
@@ -623,6 +624,7 @@ au BufWrite *.[ch]      :%s/ \+$//e
 au BufWrite *.cc        :%s/ \+$//e
 au BufWrite *.cpp       :%s/ \+$//e
 au BufWrite *.java      :%s/ \+$//e
+au BufWrite *.lua       :%s/ \+$//e
 au BufWrite *.idl       :%s/ \+$//e
 au BufWrite *.p[ml]     :%s/ \+$//e
 au BufWrite *.sh        :%s/ \+$//e
