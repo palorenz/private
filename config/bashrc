@@ -22,6 +22,10 @@
 # So we use two variables to guard sourcing.
 # Note: if only MSYS has /etc/profile source ~/.bashrc, maybe a MSYS
 # specific exception could be better.
+
+# If not running interactively, don't do anything
+[[ $- == *i* ]] || return
+
 test -z "$PROFILEREAD" && test -z "$PROFILEONCE" &&
     { export PROFILEONCE=true ; . /etc/profile ; }
 
