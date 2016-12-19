@@ -603,6 +603,8 @@ autocmd BufReadPost dehetucks2.cone.bombardier.com.*.txt  :set syntax=dokuwiki
 "
 " Some more autocommand examples which set the values for
 " "autoindent", "expandtab", "shiftwidth", "tabstop", and "textwidth":
+au BufEnter CMakeList*  set ai et sw=4 ts=4
+au BufEnter *.cmake     set ai et sw=4 ts=4
 au BufEnter *.[ch]      set ai et sw=4 ts=4 "cino=l1,g0
 au BufEnter *.cc        set ai et sw=4 ts=4 "cino=l1,g0
 au BufEnter *.cpp       set ai et sw=4 ts=4 "cino=l1,g0
@@ -620,6 +622,8 @@ au BufEnter *.xml       set ai et sw=2 ts=2
 au BufEnter *.js        set ai et sw=4 ts=4
 au BufEnter *.pr[io]    set ai et sw=4 ts=4
 
+au BufWrite CMakeList*  :%s/ \+$//e
+au BufWrite *.cmake     :%s/ \+$//e
 au BufWrite *.[ch]      :%s/ \+$//e
 au BufWrite *.cc        :%s/ \+$//e
 au BufWrite *.cpp       :%s/ \+$//e
@@ -1393,7 +1397,7 @@ set tags=$VIEW/tags
 
 " using make wrapper script instead of make directly (to use "debug" as default
 " target is most cases)
-set makeprg=make_debug.sh
+"set makeprg=make_debug.sh
 
 " Highlighting matching parens
 " You can avoid loading this plugin by setting the loaded_matchparen variable:
