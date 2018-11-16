@@ -613,13 +613,14 @@ au BufEnter *.lua       set ai et sw=4 ts=4
 au BufEnter *.idl       set ai et sw=4 ts=4
 au BufEnter *.p[ml]     set ai et sw=4 ts=4
 au BufEnter .vimrc      set ai et sw=4 ts=4
-au BufEnter *.html      set ai    sw=2 ts=2
-au BufEnter *.shtml     set ai    sw=2 ts=2
+au BufEnter *.html      set ai et sw=2 ts=2
+au BufEnter *.shtml     set ai et sw=2 ts=2
 au BufEnter *.cs        set ai et sw=4 ts=4
 au BufEnter *.sh        set ai et sw=4 ts=4
 au BufEnter *.asn1      set ai et sw=4 ts=4
 au BufEnter *.xml       set ai et sw=2 ts=2
-au BufEnter *.js        set ai et sw=4 ts=4
+au BufEnter *.js        set ai et sw=2 ts=2
+au BufEnter *.ejs       set ai et sw=2 ts=2
 au BufEnter *.pr[io]    set ai et sw=4 ts=4
 
 au BufWrite CMakeList*  :%s/ \+$//e
@@ -636,6 +637,8 @@ au BufWrite *.cs        :%s/ \+$//e
 au BufWrite *.pr[io]    :%s/ \+$//e
 au BufWrite *.asn1      :%s/ \+$//e
 au BufWrite *.js        :%s/ \+$//e
+au BufWrite *.ejs       :%s/ \+$//e
+au BufWrite *.html      :%s/ \+$//e
 
 " au BufEnter *.java      set ai    sw=4 ts=4
 " au BufEnter */drafts/*  set tw=72
