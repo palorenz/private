@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd
+eval `ssh-agent -s`;
+echo ssh-agent
+ssh-add </dev/null
