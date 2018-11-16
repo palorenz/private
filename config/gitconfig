@@ -1,0 +1,19 @@
+[user]
+	name = Patrick Lorenz
+	email = patrick.lorenz@rail.bombardier.com
+[core]
+	editor = vim
+[color]
+	ui = auto
+[merge]
+	conflictstyle = diff3
+[http]
+	postBuffer = 5M
+[push]
+	default = simple
+[rebase]
+	autoSquash = true
+	autoStash = true
+[pull]
+	ff = only
+
