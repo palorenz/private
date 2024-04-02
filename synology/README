@@ -1,5 +1,0 @@
-- ccu.io-master.zip copied to /volume1/data/
-- unzip
-- ccu.io.sh copied to /usr/local/etc/rc.d/
-- ln -s ccu.io.sh S99ccu.io.sh
-
