@@ -1,17 +1,68 @@
 version 5.3
 " This should be "version 5.4" now - but some people source my vimrc
 " here and they'd get errors if I upgraded my vimrc to that.  :-/
+" Oldest version I currently have to test is 6.1, but I don't see a
+" difference when setting the version here
 " ==================================================================
 " File:         $HOME/.vimrc.forall  (sourced by ~USER/.vimrc)
-" Last update:  Thu Jul 01 20:00:00 MET DST 1999
+" Last update from Sven:  Thu Jul 01 20:00:00 MET DST 1999
+" master branch
+" Linux version
+
+" Vundle
+" git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+" We use a start wrapper (always exist) to load Vundle if it exists.
+  let std_vundle_start_file=glob("~/.vim/vundle_start.vim")
+  let std_vundle_main_file=glob("~/.vim/bundle/Vundle.vim/autoload/vundle.vim")
+  if filereadable(std_vundle_main_file)
+     let std_vundle_start_result="file readable: " . std_vundle_main_file
+     exe "source " . std_vundle_start_file
+  else
+     let std_vundle_start_result="file not readable: " . std_vundle_main_file
+  endif
+
+" http://stackoverflow.com/questions/5477565/how-to-setup-vim-properly-for-editing-in-utf-8
+if has("multi_byte")
+  if &termencoding == ""
+    let &termencoding = &encoding
+  endif
+  set encoding=utf-8
+endif
+
+" Set a better gvim GUI console font.
+" http://stackoverflow.com/questions/3316244/set-gvim-font-in-vimrc-file
+if has("gui_running")
+  if has("gui_gtk2")
+    set guifont=Monospace\ 10,DejaVu\ Sans\ Mono\ h10,Liberation\ Mono\ 10
+  elseif has("gui_win32")
+    set guifont=Consolas:h9,Lucida\ Sans\ Typewriter:h9
+  endif
+endif
 
   set noexpandtab
 
 "       autoindent:  "off" as I usually do not write code.
-"  set noautoindent
-    set autoindent
-    set smartindent
-    set nocindent
+" set noautoindent
+  set autoindent
+"  http://vim.wikia.com/wiki/Indenting_source_code
+"      If you plan on using file type based indentation, don't set
+"      'smartindent' or 'cindent'. You may still set 'autoindent', since it
+"      doesn't interfere.
+"  set smartindent
+"  set nocindent
+filetype plugin indent on
+set cinoptions=l1,(1s
+
+"       autoread: When a file has been detected to have been changed
+"       outside of Vim and it has not been changed inside of Vim,
+"       automatically read it again.
+"       *.utf8 is an exception, because I only use this as Its All Text
+"       Firefox Plug-In interchange file and here I don't want to
+"       lose undo history because of accidentally page reload in other tab
+"       Note: Firefox edit-undo history is kept in first tab.
+if v:version >= 600
+  set autoread
+endif
 "
 "       autowrite: Automatically save modifications to files
 "       when you use critical (rxternal) commands.
@@ -22,6 +73,12 @@ version 5.3
 "
 "       backspace:  '2' is much smarter. -> "help backspace"
   set   backspace=2
+
+"       clipboard: Should Vim use the X-Server clipboard ("*) automatically?
+"                  No, let's allow middle mouse an independent buffer,
+"                  but accessible via "* register
+" set clipboard=autoselect,exclude:cons\|linux
+  set clipboard=exclude:cons\|linux
 "
 "       background:  Are we using a "light" or "dark" background?
 " set   background=dark
@@ -49,6 +106,14 @@ version 5.3
 
 "       esckeys:    allow usage of cursor keys within insert mode
   set   esckeys
+
+
+"       foldlevelstart: sets 'foldlevel' when starting to edit another
+"       buffer in a window. Useful to always start editing with all folds
+"       closed (value zero), some folds closed (one) or no folds closed (99).
+if v:version >= 600
+    set foldlevelstart=99
+endif
 "
 "       formatoptions:  Options for the "text format" command ("gq")
 "                       I need all those options (but 'o')!
@@ -98,6 +163,29 @@ version 5.3
 "       laststatus:  show status line?  Yes, always!
 "       laststatus:  Even for only one buffer.
   set   laststatus=2
+" Status line
+"set statusline=%t      "tail of the filename
+set statusline=%f       "path, rel. or as typed
+set statusline+=\ %h      "help file flag
+set statusline+=%m      "modified flag
+set statusline+=%r      "read only flag
+set statusline+=%{Show_Status()} " my status stuff (paste, ",sc")
+set statusline+=\ [%{strlen(&fenc)?&fenc:'none'}, "file encoding
+"set statusline+=%-.2{&ff}] "file format
+set statusline+=%-.2{strpart(&ff,0,1)}] "file format first letter
+set statusline+=%y      "filetype
+" GIT infos
+if exists('g:loaded_fugitive')
+  set statusline+=\ %{fugitive#statusline()}
+endif
+" Show in which C function we are
+"   http://vim.wikia.com/wiki/VimTip1454
+set statusline+=\ %{WhatFunction()}
+set statusline+=%=      "left/right separator
+set statusline+=%v,     "virtual cursor column (%c: char count, 1 for tab)
+set statusline+=%l/%L   "cursor line/total lines
+set statusline+=\ b%n,    "buffer number
+set statusline+=\ %P    "percent through file
 "
 " [VIM5]lazyredraw:  do not update screen while executing macros
   set   lazyredraw
@@ -117,6 +205,7 @@ version 5.3
 "       through some brain-dead telnet program (there are many).
 "set listchars=eol:$
 set list
+"set listchars=trail:·,tab:»·
 set listchars=trail:·,tab:»·
 "
 "       magic:  Use 'magic' patterns  (extended regular expressions)
@@ -139,6 +228,12 @@ set listchars=trail:·,tab:»·
 "  set   path=.,,~/.P/vim,~/.P/vim/syntax,~/.P/vim/source,$VIM/syntax/
 " set   path=.,,~/.P/vim,~/.P/mutt/,~/.P/elm,~/.P/slrn/,~/.P/nn
 "
+  set path+=*/src,build/$HOSTNAME/*/src
+
+" Tags (use default)
+"   generate with e.g. "ctags -eR --c-kinds=+px .".
+"   or on ancient systems with e.g. "ctags  `find . -name '*.[ch]*'`"
+
 "       report: show a report when N lines were changed.
 "               report=0 thus means "show all changes"!
   set   report=0
@@ -173,7 +268,9 @@ set listchars=trail:·,tab:»·
 "
 "       shortmess:   Kind of messages to show.   Abbreviate them all!
 "          New since vim-5.0v: flag 'I' to suppress "intro message".
-  set   shortmess=at
+"          O message for reading a file overwrites any previous message.
+"             Also for quickfix message (e.g., ":cn").
+  set   shortmess=atO
 "
 "       showcmd:     Show current uncompleted command?  Absolutely!
   set   showcmd
@@ -198,21 +295,36 @@ set listchars=trail:·,tab:»·
 
 " Set the colors for vim on "xterm"
 "  if &term=="xterm"
-  set t_Co=8
-  set t_AB=[%?%p1%{8}%<%t%p1%{40}%+%e%p1%{92}%+%;%dm
-  set t_AF=[%?%p1%{8}%<%t%p1%{30}%+%e%p1%{82}%+%;%dm
+"  set t_Co=8
+"  set t_AB=[%?%p1%{8}%<%t%p1%{40}%+%e%p1%{92}%+%;%dm
+"  set t_AF=[%?%p1%{8}%<%t%p1%{30}%+%e%p1%{82}%+%;%dm
 "  endif
-"
+
+" If ALL our xterms have 256 colors, we can enable them.
+" This actually is a workaround, because xterms and putty have 256 colors,
+"   but do not set "TERM=xterm-256color" (which does not work with mutt)
+if &term=="xterm"
+  set t_Co=256
+endif
+
+" Change color defaults for dark-background xterm
+" Search is used in "copen". Default is Brightwhite-on-yellow?!
+"   Set black(0) on yellow (3)
+highlight Search term=standout ctermfg=0 ctermbg=3
+" Spell checking (hint: set spell spelllang=en, correct "z=")
+"   See also nmap ,sc
+if v:version >= 700
+hi SpellBad       term=reverse ctermbg=88 gui=undercurl guisp=Red
+hi SpellCap       term=reverse ctermbg=81 gui=undercurl guisp=Blue
+hi SpellRare      term=reverse ctermbg=225 gui=undercurl guisp=Magenta
+endif
+
 "       textmode:    no - I am using Vim on UNIX!
   set notextmode
 "
 "       textwidth
-" usually it should 65 to enfoce each line fits into a normal
-" terminal
 "  set   textwidth=65
-" At Bombardier a maximum width is not specified, by this nearly
-" all existing code is widther than 80 ...
-set   textwidth=80
+"  NOW in au BufEnter *
 "
 "       title:
   set notitle
@@ -239,7 +351,7 @@ set   textwidth=80
 "
 "       t_vb:  terminal's visual bell - turned off to make Vim quiet!
 "       Please use this as to not annoy cow-orkers in the same room.
-"       Thankyou!  :-)
+"       Thank you  :-)
 " set   t_vb=
 "
 "       whichwrap:
@@ -254,9 +366,9 @@ set   textwidth=80
 "
 "       writebackup:
   set nowritebackup
-"       try autodetect the fileencoding
-"       currently required for utf-8 encoded xml files (routedatabase)
-"  set fileencodings=ucs-bom,utf-8,latin1
+
+" needing more entries than the default of 20
+  set history=2000
 "
 "     Yruler : A ruler.
   iab Yruler 1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -264,30 +376,30 @@ set   textwidth=80
   iab  Ydel  [...]
   vmap ,del c [...] <ESC>
 
-  vmap ,fig !figlet -k -d /usr/lib/figlet22/fonts -f mini
 "
 " Correcting those typos. [I almost never get these right.  :-(]
 " See also:  http://www.igd.fhg.de/~zach/programs/acl/
 " Often used filenames - only needed these on the command line:
 " see also:  http://www.math.fu-berlin.de/~guckes/setup/
 "
-  cab Vrc	~/.vimrc
-  cab SIGS 	~/Mail/signatures
+  cab Vrc  ~/.vimrc
+  cab SIGS ~/Mail/signatures
 "
 " A list of filenames that are needed to shorten some autocommands:
 " cab MAILNEWSFILES .article,.followup,.letter,mutt*[0-9],/postpone/*
 " cab MAILNEWSFILES *.article,*.followup,*.letter,*mutt*
   let MAILNEWSFILES = "*.article,*.followup,*.letter,mutt*"
 
-  ab Yoki   oki<CR><CR>Patrick<CR>
-  ab HDL    HDL<CR><CR>Patrick
-  ab MfG    Mit freundlichen Grüßen / Best regards<CR><CR>Patrick Lorenz
-  ab Yme    Patrick Lorenz <patrick.lorenz@rail.bombardier.com>
-  ab Ynos   # PAL - no SCR intern:
-
+  ab Yoki   oki,<CR><CR>Patrick
   ab Yline1 ------------------------------------------------------------------->8=======
   ab Yline2 =======8<-------------------------------------------------------------------
-  
+"                                                                 O
+"                                                              \ /
+"---------------------------------------------------------------X-----=======
+"                                                              / \
+"                                                                 O
+
+
 " Abbreviations - General Editing - Inserting Dates and Times
 " ===================================================================
 "
@@ -348,7 +460,7 @@ set   textwidth=80
 "
 " 981210 Whenever I paste some text into VIM I have to
 " toggle from "nopaste" to "paste" and back again:
- map <f4>   :set paste!<c-m>:set paste?<c-m>
+" map <f4>   :set paste!<c-m>:set paste?<c-m>
 "  map <esc>[14~ :set paste!<c-m>:set paste?<c-m>
 "
 " "tal" is the "trailer alignment" filter program
@@ -392,16 +504,6 @@ set   textwidth=80
 " Pleae note that here we need to prevent a loop in the mapping by
 " using the comamnd "noremap"!
   noremap <C-G> 2<C-G>
-"
-" 980311  Sourcing syntax files
-" My personal syntax files are in ~/.P/vim/syntax/
-" and I need a quick way to edit and source them.
-  map ,SO :so ~/.P/vim/syntax/
-"
-" 980706  Sourcing syntax files from the distribution
-" A nice and fast way to both source syntax files
-" and to take a look at "what's there":
-  map ,V  :so $VIM/syntax/
 "
 " 990614  Quick insertion of an empty line:
 " nmap <CR> o<ESC>
@@ -472,9 +574,27 @@ set   textwidth=80
 "     Stws = show trailing whitespace
   nmap ,Stws :%s/  *$/_/g<C-M>
   vmap ,Stws :%s/  *$/_/g<C-M>
+
+" cleartool config spec:
+" convert "ct ci" STDOUT to config spec rules.
+  vmap ,ctcs :s/Checked in "\(\/view\/[^\/]\+\)\?\(\/local\/[^\/]\+\/ccviews\/[^\/]\+\)\?/    element /g<C-M>:'<,'>s/" version "/\t/<C-M>:'<,'>s/"\.$/<C-M>:g/\s*cleartool: Warning: Version checked in is not selected by view./d<C-M>:g/\s*Loading ".*" (\d\+ bytes).*/d<C-M>
+
 " kill trailing whitespace
-  nmap ,ktws :%s/ \+$//g<C-M>
-  vmap ,ktws :%s/ \+$//g<C-M>
+fun! KtwsAuto()
+  if exists("b:std_noktws") && b:std_noktws
+  else
+    call Ktws()
+  endif
+endfun
+fun! Ktws()
+  let x=line(".")
+  let y=col(".")
+  "silent %s/ \+$//eg
+  %s/ \+$//eg
+  call cursor(x,y)
+endfun
+  nmap ,ktws :call Ktws()<C-M>
+  vmap ,ktws :call Ktws()<C-M>
 "
 " General Editing - Turning umlauts into ascii (for German keyboards)
 "
@@ -544,6 +664,9 @@ set   textwidth=80
 " The following do not work as "\s" is not a character
 " and thus cannot be part of a "character set".
 "  map ,cqel  :g/^[>\s]\+$/d
+
+" Figlet playing
+  vmap ,fig !figlet -k -d /usr/lib/figlet22/fonts -f mini
 "
 " Some people have strange habits within their writing.
 " But if you cannot educate them - rewrite their text!  ;-)
@@ -581,6 +704,12 @@ set   textwidth=80
 "  map ,Sbl :g/^\s*$/,/[^ <c-i>]/-j
 "  map ,Sbl :g/^\s*$/,/[^ \t]/-j
    map ,Sbl :g/^\s*$/,/\S/-j
+
+" When viewing colored log files with VIM, a "follow mode" might be helpful
+"   (like tail "-f" or less "F")
+"nmap ,F :set lazyredraw | while 1 | silent e! | $ | redraw | sleep 1 | endwhile
+nmap ,F :call FollowMode()<CR>
+
 "
 " ===================================================================
 " Editing of email replies and Usenet followups - using autocommands
@@ -588,60 +717,94 @@ set   textwidth=80
 "
 " Remove ALL auto-commands.  This avoids having the
 " autocommands twice when the vimrc file is sourced again.
+"   (for search au! )
   autocmd!
-
-autocmd BufReadPost dehetucks2.cone.bombardier.com.*.txt  :set syntax=dokuwiki
-
 "
+" au Buf* are executed in order of definition in file, followed
+"   by file mode line. So file defaults first:
+au BufNewFile,BufRead *           call BufferDefaults()
+fun! BufferDefaults()
+  setl tw=65 noet ts=8 sts=0
+  "call Enable_overlen_hi()
+endfun
 " Let Vim identify itself when editing emails with Mutt:
 " au! BufNewFile,BufRead mutt* let @"="X-Editor: Vim-".version." http://www.vim.org/\n"|exe 'norm 1G}""P'
 "au! BufNewFile,BufRead mutt* let @"="X-Editor: Vim-".version." http://www.vim.org/\n"|exe 'norm 1G}""P'
 "
+
 " set the textwidth to 65 characters for replies (email&usenet)
-  au BufNewFile,BufRead .letter,mutt*,nn.*,snd.* set tw=65
-  au BufNewFile,BufRead ,bash-fc-* set paste nolist
+  au BufNewFile,BufRead .letter,mutt*,nn.*,snd.* setl tw=65
+"  au BufNewFile,BufRead .letter,mutt*,nn.*,snd.* :normal ,rplc
+  au BufNewFile,BufRead ,bash-fc-*,/tmp/cvs* call Enable_paste()
+  au BufNewFile,BufRead *.git/COMMIT_EDITMSG call Enable_paste()
 "
 " Some more autocommand examples which set the values for
 " "autoindent", "expandtab", "shiftwidth", "tabstop", and "textwidth":
-au BufEnter CMakeList*  set ai et sw=4 ts=4
-au BufEnter *.cmake     set ai et sw=4 ts=4
-au BufEnter *.[ch]      set ai et sw=4 ts=4 "cino=l1,g0
-au BufEnter *.cc        set ai et sw=4 ts=4 "cino=l1,g0
-au BufEnter *.cpp       set ai et sw=4 ts=4 "cino=l1,g0
-au BufEnter *.java      set ai et sw=4 ts=4
-au BufEnter *.lua       set ai et sw=4 ts=4
-au BufEnter *.idl       set ai et sw=4 ts=4
-au BufEnter *.p[ml]     set ai et sw=4 ts=4
-au BufEnter .vimrc      set ai et sw=4 ts=4
-au BufEnter *.html      set ai et sw=2 ts=2
-au BufEnter *.shtml     set ai et sw=2 ts=2
-au BufEnter *.cs        set ai et sw=4 ts=4
-au BufEnter *.sh        set ai et sw=4 ts=4
-au BufEnter *.asn1      set ai et sw=4 ts=4
-au BufEnter *.xml       set ai et sw=2 ts=2
-au BufEnter *.js        set ai et sw=2 ts=2
-au BufEnter *.ejs       set ai et sw=2 ts=2
-au BufEnter *.pr[io]    set ai et sw=4 ts=4
+au BufNewFile,BufRead *.[ch]      setl ai et sw=4 ts=4
+au BufNewFile,BufRead *.hpp       setl ai et sw=4 ts=4
+au BufNewFile,BufRead *.cc        setl ai et sw=4 ts=4
+au BufNewFile,BufRead *.cpp,*.cxx setl ai et sw=4 ts=4
+au BufNewFile,BufRead *.java      setl ai et sw=4 ts=4
+au BufNewFile,BufRead *.idl       setl ai et sw=4 ts=4
+au BufNewFile,BufRead *.moc       setl ai et sw=4 ts=4
+au BufNewFile,BufRead *.pl,*.rb,*.hs setl ai et sw=4 ts=4
+au BufNewFile,BufRead *.py        setl ai et sw=4 ts=4
+au BufNewFile,BufRead .vimrc      setl ai et sw=4 ts=4
+au BufNewFile,BufRead *.html      setl ai et sw=2 ts=2
+au BufNewFile,BufRead *.shtml     setl ai et sw=2 ts=2
+au BufNewFile,BufRead *.rb        setl ai et sw=2 ts=2
+au BufNewFile,BufRead *.erb       setl ai et sw=2 ts=2
+au BufNewFile,BufRead *.robot     setl ai et sw=4 ts=4
+au BufNewFile,BufRead confspec.prepare  setl tw=0 sts=0
+au BufNewFile,BufRead configure.{in,ac} setl tw=0 sts=0
+au BufNewFile,BufRead *.log       setl tw=0 sts=0 | :let b:std_nocolorcol=1 | call Disable_overlen_hi()
+" I used .utf8 to communicate with Browser plugin
+"   (mozex, ItsAllText or similar) and do not want to lose my
+"   changes if browser behaves oddly, so no autoread here
+if v:version >= 600
+  au BufNewFile,BufRead *.utf8    setlocal noautoread
+endif
+au BufNewFile,BufRead *.robot setlocal filetype=robot
+au BufNewFile,BufRead *.j2    setlocal filetype=jinja
 
-au BufWrite CMakeList*  :%s/ \+$//e
-au BufWrite *.cmake     :%s/ \+$//e
-au BufWrite *.[ch]      :%s/ \+$//e
-au BufWrite *.cc        :%s/ \+$//e
-au BufWrite *.cpp       :%s/ \+$//e
-au BufWrite *.java      :%s/ \+$//e
-au BufWrite *.lua       :%s/ \+$//e
-au BufWrite *.idl       :%s/ \+$//e
-au BufWrite *.p[ml]     :%s/ \+$//e
-au BufWrite *.sh        :%s/ \+$//e
-au BufWrite *.cs        :%s/ \+$//e
-au BufWrite *.pr[io]    :%s/ \+$//e
-au BufWrite *.asn1      :%s/ \+$//e
-au BufWrite *.js        :%s/ \+$//e
-au BufWrite *.ejs       :%s/ \+$//e
-au BufWrite *.html      :%s/ \+$//e
+au BufNewFile,BufRead Makefile*   setl tw=0 noet nolist ts=8 sts=0
+au BufNewFile,BufRead *.utf8      setl fileencoding=utf8
+augroup filetypedetect
+  au! BufRead,BufNewFile *.sce setfiletype scilab
+augroup END
+
+au BufWrite *.[ch]      call KtwsAuto()
+au BufWrite *.hpp       call KtwsAuto()
+au BufWrite *.cpp       call KtwsAuto()
+au BufWrite *.cc        call KtwsAuto()
+au BufWrite *.java      call KtwsAuto()
+au BufWrite *.idl       call KtwsAuto()
+au BufWrite *.rb        call KtwsAuto()
+au BufWrite *.erb       call KtwsAuto()
+au BufWrite *.py        call KtwsAuto()
+au BufWrite *.robot     call KtwsAuto()
+
 
 " au BufEnter *.java      set ai    sw=4 ts=4
 " au BufEnter */drafts/*  set tw=72
+
+" Extra syntax - GIT from vim-7.3 (also needs the syntax files)
+" Git
+autocmd BufNewFile,BufRead *.git/COMMIT_EDITMSG setf gitcommit
+autocmd BufNewFile,BufRead *.git/config,.gitconfig,.gitmodules setf gitconfig
+autocmd BufNewFile,BufRead git-rebase-todo      setf gitrebase
+autocmd BufNewFile,BufRead .msg.[0-9]*
+      \ if getline(1) =~ '^From.*# This line is ignored.$' |
+      \   setf gitsendemail |
+      \ endif
+autocmd BufNewFile,BufRead *.git/**
+      \ if getline(1) =~ '^\x\{40\}\>\|^ref: ' |
+      \   setf git |
+      \ endif
+
+" automatically re-source saved vimrc
+autocmd BufWritePost ~/.vimrc   so ~/.vimrc
+
 " Examples used by talg@CS.Berkeley.edu - thanks!
 "
 " Try to use the mapping ",D" when doing a followup.
@@ -733,7 +896,7 @@ au BufWrite *.html      :%s/ \+$//e
 "      ,j = join line in commented text
 "           (can be used anywhere on the line)
 " nmap ,j Jxx
-  nmap ,j Vjgq
+"  nmap ,j Vjgq
 "
 "      ,B = break line at current position *and* join the next line
 " nmap ,B i<CR>><ESC>Jxx
@@ -814,9 +977,11 @@ au BufWrite *.html      :%s/ \+$//e
 "     ,ha = "helloagain"  (indicates reply to reply)
   map ,ha 1G}oHello, again!<CR><ESC>
 "
-"     ,H = "Hallo, Du!"  (German equivalent of "hi!" for replies)
+"     ,H = "Hello, Du!"
 " map ,H G/Quoting /e+1<CR>ye1G}oHallo, !<ESC>Po<ESC>
-  map ,H G/^\* /e+1<CR>ye1G}oHallo, !<ESC>Po<ESC>
+  map ,H G/^\* /e+1<CR>ye1G}oHello, !<ESC>Po<ESC>
+  map ,hi G/^\* /e+1<CR>ye1G}oHi ,<ESC>Po<ESC>
+  map ,Hi G/^\* /e+1<CR>ye1G}oHi !<ESC>Po<ESC>
 "
 "
 " Part 6  - Inserting Special or Standard Text
@@ -832,10 +997,14 @@ au BufWrite *.html      :%s/ \+$//e
 " map ,kqs G?^> *-- $<CR>dG
 "     ,kqs = kill quoted sig unto start of own signature:
  map ,kqs G?^> *-- $<CR>d/^-- $/<C-M>
+
+" k2e: kill to end
+  map ,k2e d/^oki,$<CR>
+
 "
 "      ,aq = "add quote"
 "            Reads in a quote from my favourite quotations:
-  nmap ,aq :r!agrep -d "^-- $" ~/.P/quotes/collection<ESC>b
+" nmap ,aq :r!agrep -d "^-- $" ~/.P/quotes/collection<ESC>b
 " see http://www.math.fu-berlin.de/~guckes/quotes/collection
 "
 "      ,s = "sign" -
@@ -851,7 +1020,7 @@ au BufWrite *.html      :%s/ \+$//e
 "
 "      ,at = "add text" -
 "            read in text file (requires manual completion):
-  nmap ,at :r ~/.P/txt/
+"  nmap ,at :r ~/.P/txt/
 "
 " MUTT: Auto-kill signatures for replies
 " map ,kqs G?^> *-- $<C-M>dG
@@ -972,42 +1141,25 @@ au BufWrite *.html      :%s/ \+$//e
 " Give the URL under the cursor to Netscape
 " map ,net yA:!netscape -remote "openurl <C-R>""
 "
-
-" nicht vorhandene Woerter koennen zu einer eigenen Sprachdatei 
-" hinzugefuegt werden, hier wird diese definiert
-set spellfile=~/.vim/spell.add
- 
-" zeige beim Vorschlagen nur die Top 10 Treffer
-set sps=best,10
- 
-" Aktivierung der Rechtschreibpruefung
-" bei mir auskommentiert, weil ich das per keymapping
-" aktivieren will, default ist aus
-"set spell spelllang=de,en
- 
-
+"
 " ===================================================================
-" Mapping of special keys - arrow keys and 
+" Mapping of special keys - arrow keys and
 " ===================================================================
 " Buffer commands (split,move,delete) -
 " this makes a little more easy to deal with buffers.
 " (works for Linux PCs in room 030)
 "  map <F4>  :split<C-M>
-  map <F2>    :set syntax=helog<C-M>
-  map <F3>    :set list!<c-m>:set nolist?<c-m>:set paste!<c-m>:set paste?<c-m>
+" toggle pasting
+"  map <F3>   :set paste!<c-m>:set paste?<c-m>:set list!<c-m>:set nolist?<c-m>
+"  map <F3>   :set list!<c-m>:set nolist?<c-m>:set paste!<c-m>:set paste?<c-m>
+  " map <F3>    :call Toggle_overlen_hi()<c-m>:set list!<c-m>:set paste!<c-m>:set paste?<c-m>
+  map <F3>    :call Toggle_paste()<CR>
   map <F4>    :cn<C-M>
   map <S-F4>  :cp<C-M>
   map <F5>    :tn<C-M>
   map <S-F5>  :tp<C-M>
   map <F6>    :bn<C-M>
   map <S-F6>  :bp<C-M>
-  map <F7>    :ctco<C-M>
-  map <F8>    :ctci<C-M>
-  map <F9>    :ctpdif<C-M><C-M>
-  map <F10>   :bd<C-M>:diffoff<C-M>
-  " enable/disable spellschecking (F11)
-  map <F11>   :set spell!<CR><Bar>:echo 'Spell check: ' . strpart('OffOn', 3 * &spell, 3)<CR>
-"  map <F11>   :set Autoformat<C-M>
   map <F12>   :bd<C-M>
 "
 " Buffer commands (split,move,delete) -
@@ -1120,13 +1272,24 @@ set sps=best,10
 " a given pattern, eg "*.c" or *".html".
 "
 " just load the main syntax file when Vim was compiled with "+syntax"
+" Note: I use xterm with black backgrounds (or reverse-video)
+"       but gvim.exe with white background (if at all)
+" May need set t_Co=256 or TERM=xterm-256color (or vim -T xterm-256color),
+"   but mutt doesn't work well with xter-256color
+" test of wrong words and rihgt words Germany das
   if has("syntax")
       " The following sources the main syntax file,
       " ie. "$VIM/syntax/syntax.vim", see ":help :syn-on":
       syntax on
       " Redefine the color for "Comment":
-      " hi! Comment  term=bold  ctermfg=cyan  guifg=blue
-      hi! Comment  cterm=bold  ctermfg=cyan
+      highlight! Comment     term=bold    ctermfg=cyan  guifg=Blue
+      " Use a dark red as background for colorcolumn
+      hi! ColorColumn term=reverse ctermbg=52    guibg=LightRed
+      if v:version < 700
+        "No spell check in versions before 7.0, sorry
+      else
+        hi SpellLocal term=underline ctermbg=14 gui=undercurl guisp=DarkCyan
+      endif
   endif
 "
 " Definition of an alternative syntax file:
@@ -1327,7 +1490,16 @@ set sps=best,10
 "
 
 " giorgio
-"set iskeyword=a-z,A-Z,48-57,_,.,-,> 
+"set iskeyword=a-z,A-Z,48-57,_,.,-,>
+
+" Ctrl-Arrow movement
+" CTRL-<Right>
+:map O5C w
+:imap O5C <ESC><Right>wi
+
+" CTRL-<Left>
+:map O5D b
+:imap O5D <ESC>bi
 
 
 " flist.vim maps for Vim
@@ -1350,66 +1522,390 @@ if filereadable(expand("hints"))
   au BufNewFile,BufReadPost *.c,*.C,*.cpp,*.CPP,*.cxx  so hints
 endif
 
+function! Html_maps()
+    map! ä &auml;
+    map! ö &ouml;
+    map! ö &ouml;
+    map! ü &uuml;
+    map! Ä &Auml;
+    map! Ö &Ouml;
+    map! Ü &Uuml;
+    map! ß &szlig;
+    set cindent shiftwidth=4 softtabstop=4
+endfunction
+"
+"if has("autocmd")
+"       autocmd BufEnter *.html,*.htm,*.shtml call html_maps()
+"endif
+"set clipboard^=html
 
-"       foldlevelstart: sets 'foldlevel' when starting to edit another
-"       buffer in a window. Useful to always start editing with all folds
-"       closed (value zero), some folds closed (one) or no folds closed (99).
-if v:version >= 600
-    set foldlevelstart=99
-endif
+"not needed anymore on most systems:
+":filetype plugin on
 
 " let mysyntaxfile = "~/.vim/mysyntax.vim"
 " so "~/.vim/doxyvim.vim"
 "so ~/.vim/doxygen.vim
+autocmd BufReadPost server.log* :setf gflog
+"autocmd BufReadPost *.log :setl nowrap
+autocmd BufReadPost server.log* :setl wrap
+autocmd BufReadPost pis.log,*HePisTestAppl*.log,*.modTest*.log :setf helog
+" mszlog now is a syntax file (automatically loaded via setf mszlog)
 "so ~/.vim/mszlog.vim
-"if !exists("log_command_loaded")
-"    let log_command_loaded = 1
-"    augroup log_read
-"        autocmd!
-"        autocmd BufReadPost *.log :so ~/.vim/mszlog.vim
-"        autocmd BufReadPost *.log :set nowrap
-"    augroup END
-"endif
+autocmd BufReadPost *.log :setf mszlog
+"autocmd BufReadPost *.log :setl nowrap
+autocmd BufReadPost *.log :setl wrap
 
-
-if !exists("ktext_command_loaded")
-	let ktext_command_loaded = 1
-	augroup ktext_read
-		autocmd!
-		autocmd BufReadPost kLog.txt :so ~/.ktext.vim
-		autocmd BufReadPost kLog.txt :%s/^\(.\)\{55\}//
-		autocmd BufReadPost kLog.txt :set nowrap
-	augroup END	
-endif	
-
-" qmake project files ends with .pro and syntax is like normal makefiles
-autocmd BufReadPost *.pro :set syntax=qmake
-autocmd BufReadPost *.pri :set syntax=qmake
-autocmd BufReadPost *.cs  :set syntax=cccs
-autocmd BufReadPost *.log :set syntax=helog
-autocmd BufReadPost *.json :set syntax=json
-autocmd BufReadPost update*.updt :set syntax=ccupdate
 
 " make clogEnter and clogLeave around the current C function
 map ,enter ?^{<CR>?(<CR>byw/^{<CR>ocbaseErrorId_t status = CBASE_ERR_OK;<CR>clogEnter(("<ESC>pA"));<CR><ESC>?^{<CR>%O<CR>clogLeave(("<ESC>pA"));<CR>return status;<ESC>
 " add if (status == OK) block and prefix status = current line
 map ,ifs ^istatus = <ESC>Oif (status == CBASE_ERR_OK) {<ESC>j==o}<ESC><CR>
-map ,adds ^i<ESC>Od.addStepC(<ESC>j==o);<ESC><CR>
 
-set tags=$VIEW/tags
+" map <F3>    :call Toggle_paste()<CR>
+fun! Enable_paste()
+  setl paste
+  setl nolist
+  "call Disable_overlen_hi()
+  let b:std_pastemode = 1
+endfun
+fun! Disable_paste()
+  setl nopaste
+  setl list
+  "call Enable_overlen_hi()
+  let b:std_pastemode = 0
+endfun
+fun! Toggle_paste()
+  if exists("b:std_pastemode") && b:std_pastemode
+    call Disable_paste()
+  else
+    call Enable_paste()
+  endif
+  setl paste?
+endfun
 
-" using make wrapper script instead of make directly (to use "debug" as default
-" target is most cases)
-"set makeprg=make_debug.sh
+" for statusline, to return e.g. "[PASTE,SPELL]"
+fun! Show_Status()
+  if v:version < 700
+    return "[ver<7]"
+  endif
+  let l:status = []
+  if exists("b:std_pastemode") && b:std_pastemode
+    call add(l:status, "PASTE")
+  endif
+  if exists("b:std_spell") && b:std_spell
+    call add(l:status, "SPELL")
+  endif
+  if len(l:status) != 0
+    "return "[" + l:status + "]";
+    return "[" . join(l:status, ",") . "]"
+  else
+    return ""
+  endif
+endfun
+
+" Spell checking mode
+nmap ,sc :call Toggle_spell()<CR>
+fun! Toggle_spell()
+  if v:version < 700
+    echo "No spell check in versions before 7.0, sorry"
+    return
+  endif
+  if exists("b:std_spell") && b:std_spell
+    setl nospell spell?
+    let b:std_spell = 0
+    nunmap n
+    nunmap N
+    nunmap <C-P>
+  else
+    setl spell spelllang?
+    let b:std_spell = 1
+    nmap n ]s
+    nmap N [s
+    nmap <C-P> z=
+  endif
+endfun
+nmap ,+ :call LargerFont()<CR>
+nmap ,- :call SmallerFont()<CR>
 
 " Highlighting matching parens
 " You can avoid loading this plugin by setting the loaded_matchparen variable:
 :let loaded_matchparen = 1
 
 " highlight long lines (>80 chars)
-"highlight OverLength ctermbg=red ctermfg=white guibg=#592929
-"if v:version >= 600
-"highlight OverLength ctermbg=blue guibg=#592929
-""match OverLength /\%81v.*/
-"match OverLength /.\%>81v/
-"endif
+fun! Enable_overlen_hi()
+  " colorcolumn seems not to work fully correctly (VIM-7.3), when switching
+  "   buffers or I'm using it wrongly, so better disable it for now, maybe
+  "   future VIMs handle it better.
+  if v:version >= 704
+    " textwidth + 1 and col 79
+    if exists("b:std_nocolorcol") && b:std_nocolorcol
+      " :setl colorcolumn=120
+      :setl colorcolumn=
+    else
+      :setl colorcolumn=+1,79
+    endif
+  elseif v:version >= 600
+    "highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+    "highlight OverLength ctermbg=darkblue guibg=#f0f0f0
+    highlight OverLength guibg=#f0f0f0
+    "match OverLength /\%81v.*/
+    if exists("b:std_nocolorcol") && b:std_nocolorcol
+      "match OverLength /.\%>120v/
+      match OverLength /.\%>999v/
+      "echo b:std_nocolorcol
+    else
+      match OverLength /.\%>81v/
+    endif
+  endif
+  let b:std_overlen_hi = 1
+endfunction
+fun! Disable_overlen_hi()
+  if v:version >= 704
+    :setl colorcolumn=
+  elseif v:version >= 600
+    highlight clear OverLength
+  endif
+  let b:std_overlen_hi = 0
+endfunction
+" Used by F3
+fun! Toggle_overlen_hi()
+  if exists("b:std_overlen_hi") && b:std_overlen_hi
+    call Disable_overlen_hi()
+  else
+    call Enable_overlen_hi()
+  endif
+endfunction
+" By default, disable
+call Disable_overlen_hi()
+
+" Automatically cd into the directory that the file is in
+" autocmd BufEnter * execute "chdir ".escape(expand("%:p:h"), ' ')
+" doesn't cripple command line:
+" autocmd BufEnter * silent! lcd %:p:h:gs/ /\\ /
+" only recent autochdir
+
+" '\e' edit in folder where the current file is in
+"  http://vim.wikia.com/wiki/Easy_edit_of_files_in_the_same_directory
+" But I usually like setting "path" and using ":find" more.
+nnoremap <Leader>e :e <C-R>=expand('%:p:h') . '/'<CR>
+
+" similar to bash shell completion:
+"   first TAB completes to longest unique match, second prints
+"   list. Extra goodie: third press iterates all matches (like
+"   vim default)
+set wildmode=longest,list,list:full
+
+" https://github.com/tpope/vim-pathogen:
+" call pathogen#infect()
+
+" Set a nicer foldtext function
+" http://vim.wikia.com/wiki/Customize_text_for_closed_folds
+
+if has("folding")
+  set foldtext=MyFoldText2()
+  function! MyFoldText1()
+    let line = getline(v:foldstart)
+    if match( line, '^[ \t]*\(\/\*\|\/\/\)[*/\\]*[ \t]*$' ) == 0
+      let initial = substitute( line, '^\([ \t]\)*\(\/\*\|\/\/\)\(.*\)', '\1\2', '' )
+      let linenum = v:foldstart + 1
+      while linenum < v:foldend
+        let line = getline( linenum )
+        let comment_content = substitute( line, '^\([ \t\/\*]*\)\(.*\)$', '\2', 'g' )
+        if comment_content != ''
+          break
+        endif
+        let linenum = linenum + 1
+      endwhile
+      let sub = initial . ' ' . comment_content
+    else
+      let sub = line
+      let startbrace = substitute( line, '^.*{[ \t]*$', '{', 'g')
+      if startbrace == '{'
+        let line = getline(v:foldend)
+        let endbrace = substitute( line, '^[ \t]*}\(.*\)$', '}', 'g')
+        if endbrace == '}'
+          let sub = sub.substitute( line, '^[ \t]*}\(.*\)$', '...}\1', 'g')
+        endif
+      endif
+    endif
+    let n = v:foldend - v:foldstart + 1
+    let info = " " . n . " lines"
+    let sub = "+ " . sub . "                                                                                                                  "
+    let num_w = getwinvar( 0, '&number' ) * getwinvar( 0, '&numberwidth' )
+    let fold_w = getwinvar( 0, '&foldcolumn' )
+    let sub = strpart( sub, 0, winwidth(0) - strlen( info ) - num_w - fold_w - 1 )
+    return sub . info
+  endfunction
+  function! MyFoldText2()
+    " for now, just don't try if version isn't 7 or higher
+    if v:version < 701
+      return foldtext()
+    endif
+    " clear fold from fillchars to set it up the way we want later
+    let &l:fillchars = substitute(&l:fillchars,',\?fold:.','','gi')
+    let l:numwidth = (v:version < 701 ? 8 : &numberwidth)
+    if &fdm=='diff'
+      let l:linetext=''
+      let l:foldtext='---------- '.(v:foldend-v:foldstart+1).' lines the same ----------'
+      let l:align = winwidth(0)-&foldcolumn-(&nu ? Max(strlen(line('$'))+1, l:numwidth) : 0)
+      let l:align = (l:align / 2) + (strlen(l:foldtext)/2)
+      " note trailing space on next line
+      setlocal fillchars+=fold:\ 
+    elseif !exists('b:foldpat') || b:foldpat==0
+      let l:foldtext = ' '.(v:foldend-v:foldstart).' lines folded'.v:folddashes.'|'
+      " Steffen wants marker right *after* end of line
+      let l:endofline = (&textwidth>0 ? &textwidth : 79) + 1
+      let l:linetext = strpart(getline(v:foldstart),0,l:endofline-strlen(l:foldtext))
+      let l:align = l:endofline-strlen(l:linetext)
+      setlocal fillchars+=fold:-
+    elseif b:foldpat==1
+      let l:align = winwidth(0)-&foldcolumn-(&nu ? Max(strlen(line('$'))+1, l:numwidth) : 0)
+      let l:foldtext = ' '.v:folddashes
+      let l:linetext = substitute(getline(v:foldstart),'\s\+$','','')
+      let l:linetext .= ' ---'.(v:foldend-v:foldstart-1).' lines--- '
+      let l:linetext .= substitute(getline(v:foldend),'^\s\+','','')
+      let l:linetext = strpart(l:linetext,0,l:align-strlen(l:foldtext))
+      let l:align -= strlen(l:linetext)
+      setlocal fillchars+=fold:-
+    endif
+    return printf('%s%*s', l:linetext, l:align, l:foldtext)
+  endfunction
+endif
+
+" http://vim.wikia.com/wiki/VimTip1454
+function! GetProtoLine()
+  let ret       = ""
+  let line_save = line(".")
+  let col_save  = col(".")
+  let window_line = winline()
+  let top       = line_save - winline() + 1
+  let so_save = &so
+  let &so = 0
+  let istypedef = 0
+  " find closing brace
+  let closing_lnum = search('^}','cW')
+  if closing_lnum > 0
+    if getline(line(".")) =~ '\w\s*;\s*$'
+      let istypedef = 1
+      let closingline = getline(".")
+    endif
+    " go to the opening brace
+    keepjumps normal! %
+    " if the start position is between the two braces
+    if line(".") <= line_save
+      if istypedef
+        let ret = matchstr(closingline, '\w\+\s*;')
+      else
+        " find a line contains function name
+        let lnum = search('^\w','bcnW')
+        if lnum > 0
+          let ret = getline(lnum)
+        endif
+      endif
+      let lines = closing_lnum - line(".")
+      let line_rel = line_save - line(".")
+      let ret = ret . ':' . line_rel . '/' . lines
+    endif
+  endif
+  "exe "keepjumps normal! " . top . "Gz\<CR>"
+  " restore position and screen line
+  call cursor(line_save, col_save)
+  " needed for diff mode (scroll fixing)
+  let line_diff = winline() - window_line
+  if line_diff > 0
+    exe 'normal ' . line_diff . "\<c-e>"
+  elseif line_diff < 0
+    exe 'normal ' . -line_diff . "\<c-y>"
+  endif
+  " sometimes cursor position is wrong after scroll fix, why? Workaround:
+  call cursor(line_save, col_save)
+  let &so = so_save
+  return ret
+endfunction
+
+" http://vim.wikia.com/wiki/VimTip1454
+function! WhatFunction()
+  " simply does not work well enough... Causes problems even while
+  "   copy&pasting and navigating sometimes breaks (window viewpoint jumps
+  "   for example)
+  return ""
+  " allow to quickly disable it (:let b:noWhatFunction=1)
+  if exists("b:nofunc") && b:nofunc
+    return ""
+  endif
+  if exists("b:noWhatFunction") && b:noWhatFunction
+    return ""
+  endif
+  if &ft != "c" && &ft != "cpp"
+    return ""
+  endif
+  let proto = GetProtoLine()
+  if proto == ""
+    return "?"
+  endif
+  let line_info = matchstr(proto, ':\d\+\/\d\+')
+  if stridx(proto, '(') > 0
+    let ret = matchstr(proto, '\~\?\w\+(\@=')
+  elseif proto =~# '\<struct\>'
+    let ret = matchstr(proto, 'struct\s\+\w\+')
+  elseif proto =~# '\<class\>'
+    let ret = matchstr(proto, 'class\s\+\w\+')
+  else
+    let ret = strpart(proto, 0, 15) . "..."
+  endif
+  let ret .= line_info
+  return ret
+endfunction
+
+" Inspired by http://vim.wikia.com/wiki/Change_font_size_quickly, but a
+"   poor simple version but for that working on Win32, too :)
+function! AdjustFontSize(amount)
+  let l:minfontsize = 6
+  let l:maxfontsize = 16
+  if (has("gui_win32") || has("gui_gtk2")) && has("gui_running")
+    let l:newsize=matchstr(&guifont, '\(\d\+\)') + a:amount
+    if (l:newsize >= l:minfontsize) && (l:newsize <= l:maxfontsize)
+      let newfont = substitute(&guifont, '\(\d\+\)', l:newsize, 'g')
+      let &guifont = newfont
+    endif
+  else
+    echoerr "You need to run a GUI version of Vim to use this function."
+  endif
+endfunction
+
+function! LargerFont()
+  call AdjustFontSize(1)
+endfunction
+command! LargerFont call LargerFont()
+
+function! SmallerFont()
+  call AdjustFontSize(-1)
+endfunction
+command! SmallerFont call SmallerFont()
+
+" When viewing colored log files with VIM, a "follow mode" might be helpful
+"   (like tail "-f" or less "F"). Could be used with a hotkey, for example:
+" :nmap ,F :call FollowMode()<CR>
+function! FollowMode()
+  echo "Follow mode"
+  set lazyredraw
+  try
+    while 1
+      silent e!
+      $
+      redraw
+      echo "following file changes (CTRL-C to stop)..."
+      sleep 1
+    endwhile
+  catch /^Vim:Interrupt$/
+    redraw
+    echo 'stopped following file changes.'
+  endtry
+endfunction
+
+" Swap GoogleTest EXPECT macro args:
+" '<,'>s/EXPECT\([_A-Z]*\)(\(.*\), \(.*\))/EXPECT\1(\3, \2)/g
+
+" http://vim.wikia.com/wiki/Forcing_UTF-8_Vim_to_read_Latin1_as_Latin1
+"   Currency sign: "¤"
+" vim: et sw=2 ts=2 tw=2 tw=75 :
